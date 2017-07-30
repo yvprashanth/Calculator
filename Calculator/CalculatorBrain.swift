@@ -8,6 +8,10 @@
 
 import Foundation
 
+func multiply(input1: Double, input2: Double) -> Double{
+    return input1 * input2
+}
+
 struct CalculatorBrain {
     
     // Accumulated Result
@@ -15,14 +19,16 @@ struct CalculatorBrain {
     
     private enum Operation {
         case constant(Double)
-        case unaryOperation
+        case unaryOperation((Double) -> Double)
+        case binaryOperation((Double, Double) -> Double)
     }
     
     private var operations : Dictionary<String, Operation> =
         [
             "π" : Operation.constant(Double.pi),
             "e": Operation.constant(M_E),
-            "√" : Operation.unaryOperation
+            "√" : Operation.unaryOperation(sqrt),
+            "×" : Operation.binaryOperation(multiply)
         ]
     
     mutating func performOperation(_ symbol: String){
@@ -30,9 +36,27 @@ struct CalculatorBrain {
             switch operation {
             case .constant(let value):
                 accumulator = value
-            case .unaryOperation:
+            case .unaryOperation(let function):
+                if accumulator != nil{
+                    accumulator = function(accumulator!)
+                }
+            case .binaryOperation(let function):
+                if accumulator != nil {
+                    pbo = PendingBinaryOperation(function: function, firstOperand: accumulator!)
+                }
                 break
             }
+        }
+    }
+    
+    private var pbo : PendingBinaryOperation?
+    
+    private struct PendingBinaryOperation {
+        let function : (Double, Double) -> Double
+        let firstOperand : Double
+        
+        func perform(with secondOperand: Double) -> Double {
+            return function(firstOperand, secondOperand)
         }
     }
     
