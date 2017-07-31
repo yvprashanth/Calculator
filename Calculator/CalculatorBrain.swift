@@ -21,6 +21,7 @@ struct CalculatorBrain {
         case constant(Double)
         case unaryOperation((Double) -> Double)
         case binaryOperation((Double, Double) -> Double)
+        case equals
     }
     
     private var operations : Dictionary<String, Operation> =
@@ -28,7 +29,8 @@ struct CalculatorBrain {
             "π" : Operation.constant(Double.pi),
             "e": Operation.constant(M_E),
             "√" : Operation.unaryOperation(sqrt),
-            "×" : Operation.binaryOperation(multiply)
+            "×" : Operation.binaryOperation(multiply),
+            "=" : Operation.equals
         ]
     
     mutating func performOperation(_ symbol: String){
@@ -42,14 +44,27 @@ struct CalculatorBrain {
                 }
             case .binaryOperation(let function):
                 if accumulator != nil {
-                    pbo = PendingBinaryOperation(function: function, firstOperand: accumulator!)
+                    pendingBinaryOperation = PendingBinaryOperation(function: function, firstOperand: accumulator!)
+                    accumulator = nil
                 }
                 break
+            case .equals:
+                performPendingBinaryOperation()
             }
         }
     }
     
-    private var pbo : PendingBinaryOperation?
+    private mutating func performPendingBinaryOperation() {
+        // With an ! it will unwrap it, but if it's just a question mark then if it's set then it will unwrap, else it will just ignore it
+        
+        if pendingBinaryOperation != nil && accumulator != nil {
+            accumulator = pendingBinaryOperation?.perform(with: accumulator!)
+            // No longer are we in the middle of pending binary operation
+            pendingBinaryOperation = nil
+        }
+    }
+            
+    private var pendingBinaryOperation : PendingBinaryOperation?
     
     private struct PendingBinaryOperation {
         let function : (Double, Double) -> Double
