@@ -13,7 +13,6 @@ func multiply(input1: Double, input2: Double) -> Double{
 }
 
 struct CalculatorBrain {
-    
     // Accumulated Result
     private var accumulator : Double?
     
@@ -28,6 +27,7 @@ struct CalculatorBrain {
         [
             "π" : Operation.constant(Double.pi),
             "e": Operation.constant(M_E),
+            "cos" : Operation.unaryOperation(cos),
             "√" : Operation.unaryOperation(sqrt),
             "×" : Operation.binaryOperation({$0 * $1}),
             "+" : Operation.binaryOperation({$0 + $1}),
@@ -59,7 +59,6 @@ struct CalculatorBrain {
     
     private mutating func performPendingBinaryOperation() {
         // With an ! it will unwrap it, but if it's just a question mark then if it's set then it will unwrap, else it will just ignore it
-        
         if pendingBinaryOperation != nil && accumulator != nil {
             accumulator = pendingBinaryOperation?.perform(with: accumulator!)
             // No longer are we in the middle of pending binary operation
