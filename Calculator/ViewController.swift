@@ -46,8 +46,4 @@ class ViewController: UIViewController {
             displayValue = result
         }
     }
-
-    @IBAction func resetDisplay(_ sender: UIButton) {
-        display.text = "0"
-    }
 }
